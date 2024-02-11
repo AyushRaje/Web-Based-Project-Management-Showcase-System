@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'corsheaders',
     'authentication',
     'django.contrib.admin',
@@ -71,7 +72,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'main_site.wsgi.application'
-
+ASGI_APPLICATION = 'main_site.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

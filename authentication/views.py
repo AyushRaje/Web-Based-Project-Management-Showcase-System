@@ -1,18 +1,19 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+# from rest_framework.decorators import api_view
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt,csrf_protect,requires_csrf_token,ensure_csrf_cookie
 import os
 from decouple import config
-
+from asgiref.sync import sync_to_async
 from database.checks.check_referral import check_referral_code 
 from database.saves.create_org import create_organization,generate_referral_code
 from database.saves.create_api_key import create_api_key
+from adrf.decorators import api_view
 # Create your views here.
 @csrf_exempt
 @api_view(['GET'])
-def ping(request):
+async def ping(request):
     if request:
         response = {
             "status":True,
@@ -25,10 +26,10 @@ def ping(request):
         }    
     return Response(response)
 @api_view(['GET'])
-def get_csrf(request):
+async def get_csrf(request):
     status = "Success"
     try:
-        token = get_token(request)
+        token = await sync_to_async(get_token,thread_sensitive=True)(request)
     except Exception as e:
         status = "Exception in get token :"+str(e)
         token = ""     
@@ -39,7 +40,7 @@ def get_csrf(request):
 
 @csrf_protect
 @api_view(['POST'])
-def create_org(request):
+async def create_org(request):
     status = "Success"
     org_id = ""
     name = request.POST.get('name',None)
@@ -47,9 +48,9 @@ def create_org(request):
     referral = request.POST.get('referral',None)
     type = request.POST.get('type','Private')
     try:
-        check,status = check_referral_code(referral=referral)
+        check,status = await check_referral_code(referral=referral)
         if check:
-            status,org_id =create_organization(name=name,city=city,referral=referral,type=type)
+            status,org_id = await create_organization(name=name,city=city,referral=referral,type=type)
         else:
             status = "Invalid Referral"
     except Exception as e:
@@ -63,13 +64,13 @@ def create_org(request):
 @csrf_protect
 @requires_csrf_token
 @api_view(['POST'])
-def generate_api_key(request):
+async def generate_api_key(request):
     status = "Success"
     api_key = ""
     org_name = request.POST.get('org_name','')
     referral = request.POST.get('referral','')
     try:
-        status,api_key = create_api_key(org_name=org_name,referral=referral)
+        status,api_key = await sync_to_async(create_api_key,thread_sensitive=True)(org_name=org_name,referral=referral)
     except Exception as e:
         status = "Exception in generate api_key: "+str(e)
         api_key = ""
@@ -82,12 +83,13 @@ def generate_api_key(request):
 @csrf_protect
 @requires_csrf_token
 @api_view(['POST'])
-def generate_referral(request):
+async def generate_referral(request):
     status = "Success"
     user_key = request.POST.get('user_key','')
+    referral = ""
     try:
         if user_key == config('USER_KEY'):
-           referral = generate_referral_code()
+           referral = await generate_referral_code()
         else:
             status = "Invalid User key"
             referral = ""

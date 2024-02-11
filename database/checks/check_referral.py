@@ -1,11 +1,11 @@
 from authentication.models import ReferralCode
 
-def check_referral_code(referral):
+async def check_referral_code(referral):
     status = "Success"
     check =False
     try:
-        referral_obj = ReferralCode.objects.filter(code=referral).values_list()
-        if len(referral_obj):
+        referral_obj = await ReferralCode.objects.aget(code=referral)
+        if referral_obj:
             check = True
         else:
             check = False
