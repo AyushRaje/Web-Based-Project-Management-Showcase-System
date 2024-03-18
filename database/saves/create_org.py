@@ -8,7 +8,7 @@ async def generate_referral_code():
         referral_code = prefix + random_digits
         ref_obj = await ReferralCode.objects.acreate(code=referral_code) 
         ref_obj.referral_count +=1
-        ref_obj.asave()
+        await ref_obj.asave()
     except Exception as e:
         print("Exception in generate referral code :"+str(e))
     
@@ -22,9 +22,9 @@ async def create_organization(name,city,type,referral):
         org_obj.type = type
         ref_obj = await ReferralCode.objects.aget(code=referral)
         ref_obj.referral_count+=1
-        ref_obj.asave()
+        await ref_obj.asave()
         org_obj.referral = ref_obj
-        org_obj.asave()
+        await org_obj.asave()
         org_id = org_obj.pk
         
         
