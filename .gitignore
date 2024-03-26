@@ -1,3 +1,6 @@
+*.pyc
+*.pyo
 /virtual_env
-/.env
+/venv
 /file.py
+/.env

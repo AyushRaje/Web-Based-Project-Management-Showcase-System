@@ -8,7 +8,6 @@ from decouple import config
 from asgiref.sync import sync_to_async
 from database.checks.check_referral import check_referral_code 
 from database.saves.create_org import create_organization,generate_referral_code
-from database.saves.create_api_key import create_api_key
 from adrf.decorators import api_view
 # Create your views here.
 @csrf_exempt
@@ -61,24 +60,6 @@ async def create_org(request):
         "org_id":org_id,
         "referral":referral
     })                
-@csrf_protect
-@requires_csrf_token
-@api_view(['POST'])
-async def generate_api_key(request):
-    status = "Success"
-    api_key = ""
-    org_name = request.POST.get('org_name','')
-    referral = request.POST.get('referral','')
-    try:
-        status,api_key = await sync_to_async(create_api_key,thread_sensitive=True)(org_name=org_name,referral=referral)
-    except Exception as e:
-        status = "Exception in generate api_key: "+str(e)
-        api_key = ""
-        print(status)
-    return Response({
-       "status":status,
-       "api_key":api_key 
-    })               
 
 @csrf_protect
 @requires_csrf_token
