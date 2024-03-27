@@ -80,4 +80,18 @@ async def generate_referral(request):
     return Response({
        "status":status,
        "referral":referral 
+    })
+@csrf_protect
+@requires_csrf_token
+@api_view(['GET'])
+async def test_api(request):
+    status = "Success"
+    try:
+        pass
+    except Exception as e:
+        status = "Exception in test api: "+str(e)
+        print(status)
+    return Response({
+       "status":status,
+       "api_gateway":'active'
     })        
